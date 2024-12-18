@@ -1,6 +1,14 @@
 <h1 class="mb-4">Trans Units</h1>
 
-<!-- Bottone per aggiornare manualmente i dati -->
+<% if @last_import %>
+  <p class="text-light">
+    Ultimo import: <%= @last_import.imported_at.strftime("%Y-%m-%d %H:%M:%S") %> 
+    (<%= @last_import.source == "automatic" ? "Automatico" : "Manuale" %>)
+  </p>
+<% else %>
+  <p class="text-light">Nessun import ancora eseguito.</p>
+<% end %>
+
 <%= button_to "Refresh", refresh_trans_units_path, method: :post, class: "btn btn-primary mb-4", id: "refresh_btn" %>
 
 <% if @updated_today.any? %>
@@ -9,8 +17,7 @@
     <ul class="mb-0">
       <% @updated_today.each do |tu| %>
         <li>
-          <%= tu.resname %> (ID: <%= tu.trans_unit_id %>) 
-          - Aggiornato il <%= tu.updated_at.strftime("%Y-%m-%d %H:%M") %>
+          <%= tu.resname %> (ID: <%= tu.trans_unit_id %>) - Aggiornato il <%= tu.updated_at.strftime("%Y-%m-%d %H:%M") %>
         </li>
       <% end %>
     </ul>
@@ -23,23 +30,22 @@
         if (alert) {
           alert.style.display = "none";
         }
-      }, 1000); // 1 secondo
+      }, 1000);
     });
   </script>
 <% end %>
 
 <div class="container-fluid">
   <div class="row row-cols-1 row-cols-md-3 g-3">
+    <% @groups = @trans_units.group_by(&:trans_unit_id) %>
     <% @groups.each do |trans_unit_id, units| %>
-      <% # Trova l'elemento NAME, DESC e MOBILE
-         name_unit = units.find { |u| u.resname&.include?("_NAME") }
+      <% name_unit = units.find { |u| u.resname&.include?("_NAME") }
          desc_unit = units.find { |u| u.resname&.include?("_DESC") }
          mobile_unit = units.find { |u| u.resname&.include?("_MOBILE") }
          
          name = name_unit&.source || "Senza Nome"
          desc = desc_unit&.source || ""
          mobile = mobile_unit&.source
-         
          last_update = units.map(&:updated_at).compact.max %>
 
       <div class="col">

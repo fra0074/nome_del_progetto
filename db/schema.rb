@@ -10,9 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_18_182008) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_18_230445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "import_logs", force: :cascade do |t|
+    t.datetime "imported_at"
+    t.string "source"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "trans_units", force: :cascade do |t|
     t.string "resname"

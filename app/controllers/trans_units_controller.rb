@@ -1,15 +1,15 @@
 class TransUnitsController < ApplicationController
   def index
-    # Ordina i TransUnit per trans_unit_id in ordine decrescente e li raggruppa per trans_unit_id
-    all_units = TransUnit.order(trans_unit_id: :desc)
-    @groups = all_units.group_by(&:trans_unit_id)
-
+    @trans_units = TransUnit.order(trans_unit_id: :desc)
     @today = Date.current
     @updated_today = TransUnit.where("DATE(updated_at) = ?", @today)
+
+    # Recupera l'ultimo import
+    @last_import = ImportLog.order(imported_at: :desc).first
   end
 
   def refresh
-    XmlFetcher.call
+    XmlFetcher.call(source: "manual")
     redirect_to root_path, notice: "Dati aggiornati con successo."
   end
 end
