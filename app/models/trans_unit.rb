@@ -1,0 +1,2 @@
+class TransUnit < ApplicationRecord
+end

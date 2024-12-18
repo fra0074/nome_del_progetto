@@ -1,0 +1,96 @@
+<h1 class="mb-4">Trans Units</h1>
+
+<!-- Bottone per aggiornare manualmente i dati -->
+<%= button_to "Refresh", refresh_trans_units_path, method: :post, class: "btn btn-primary mb-4", id: "refresh_btn" %>
+
+<% if @updated_today.any? %>
+  <div class="alert alert-info" id="updated_today_alert">
+    <strong>Novità di oggi:</strong>
+    <ul class="mb-0">
+      <% @updated_today.each do |tu| %>
+        <li>
+          <%= tu.resname %> (ID: <%= tu.trans_unit_id %>) 
+          - Aggiornato il <%= tu.updated_at.strftime("%Y-%m-%d %H:%M") %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(function() {
+        var alert = document.getElementById("updated_today_alert");
+        if (alert) {
+          alert.style.display = "none";
+        }
+      }, 1000); // 1 secondo
+    });
+  </script>
+<% end %>
+
+<div class="container-fluid">
+  <div class="row row-cols-1 row-cols-md-3 g-3">
+    <% @groups.each do |trans_unit_id, units| %>
+      <% # Trova l'elemento NAME, DESC e MOBILE
+         name_unit = units.find { |u| u.resname&.include?("_NAME") }
+         desc_unit = units.find { |u| u.resname&.include?("_DESC") }
+         mobile_unit = units.find { |u| u.resname&.include?("_MOBILE") }
+         
+         name = name_unit&.source || "Senza Nome"
+         desc = desc_unit&.source || ""
+         mobile = mobile_unit&.source
+         
+         last_update = units.map(&:updated_at).compact.max %>
+
+      <div class="col">
+        <div class="card text-bg-dark h-100 border border-light" style="font-size: 0.9rem;">
+          <div class="card-header p-2">
+            <strong><%= name %></strong> (ID: <%= trans_unit_id %>)
+          </div>
+          <div class="card-body p-2">
+            <p class="mb-2"><%= desc %></p>
+            <% if mobile.present? %>
+              <p class="mb-0"><em><%= mobile %></em></p>
+            <% end %>
+          </div>
+          <div class="card-footer p-2">
+            Ultimo aggiornamento: <%= last_update.strftime("%Y-%m-%d %H:%M") if last_update %>
+            <% if last_update&.to_date == @today %>
+              <span class="badge bg-success ms-2">Aggiornato Oggi</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Overlay di caricamento -->
+<div id="loading_overlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+">
+  <div class="spinner-border text-light" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var refreshBtn = document.getElementById("refresh_btn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", function() {
+        var overlay = document.getElementById("loading_overlay");
+        if (overlay) {
+          overlay.style.display = "flex";
+        }
+      });
+    }
+  });
+</script>
